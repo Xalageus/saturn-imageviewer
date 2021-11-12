@@ -1,0 +1,9 @@
+ART
+*.bin
+.vscode
+env
+*.png
+*.jpg
+images.h
+game.*
+*.o
