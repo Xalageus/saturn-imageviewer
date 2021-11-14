@@ -13,9 +13,14 @@ const int DEFAULT_Y_POS = 0;
 const int MIN_ZOOM = 40;
 const int MAX_ZOOM = 1000;
 
+const float DEFAULT_FALLBACK_ZOOM = 1;
+const float MIN_FALLBACK_ZOOM = 0;
+const float MAX_FALLBACK_ZOOM = 8;
+
 int image = 0;
 int max_image = 0;
 int zoom_level = 200;
+float fallback_zoom = 1;
 bool pan_mode = false;
 int x_pos = 0;
 int y_pos = 0;
@@ -23,10 +28,11 @@ bool enable_menu = false;
 
 void clear_prints(){
 	jo_printf(0, 0, "                ");
-	jo_printf(0, 1, "                ");
+	jo_printf(0, 1, "                   ");
 	jo_printf(0, 2, "                ");
-	jo_printf(0, 4, "           ");
-	jo_printf(0, 5, "          ");
+	jo_printf(0, 3, "                ");
+	jo_printf(0, 5, "           ");
+	jo_printf(0, 6, "          ");
 	jo_printf(12, 28, "          ");
 	jo_printf(2, 28, "          ");
 	jo_printf(35, 28, "    ");
@@ -39,27 +45,33 @@ void sys_draw(void){
 		clear_prints();
 
 		if(draw_debug){
-			//double zoomint;
-			//double zoomsub = modf(zoom_level, &zoomint);
-			//jo_printf(0, 0, "zoom_level=%d.%d", (int)zoomint, (int)(zoomsub * 100));
+			double fzoomint;
+			double fzoomsub = modf(fallback_zoom, &fzoomint);
 			jo_printf(0, 0, "zoom_level=%d", zoom_level);
-			jo_printf(0, 1, "x_pos=%d", x_pos);
-			jo_printf(0, 2, "y_pos=%d", y_pos);
-			jo_printf(0, 4, "height=%d", jo_sprite_get_height(0));
-			jo_printf(0, 5, "width=%d", jo_sprite_get_width(0));
+			jo_printf(0, 1, "fallback_zoom=%d.%d", (int)fzoomint, (int)(fzoomsub * 100));
+			jo_printf(0, 2, "x_pos=%d", x_pos);
+			jo_printf(0, 3, "y_pos=%d", y_pos);
+			jo_printf(0, 5, "height=%d", jo_sprite_get_height(0));
+			jo_printf(0, 6, "width=%d", jo_sprite_get_width(0));
 		}
 
 		jo_printf(2, 28, "%d/%d", image + 1, max_image);
 		jo_printf(35, 28, "%d%%", jo_sprite_usage_percent());
 	}
 
-	//jo_sprite_draw3D(0, x_pos, y_pos, 500);
-	jo_3d_draw_sprite_at(0, x_pos, y_pos, zoom_level);
+	if(fallback_drawing){
+		jo_sprite_draw3D(0, x_pos, y_pos, 500);
+	}else{
+		jo_3d_draw_sprite_at(0, x_pos, y_pos, zoom_level);
+	}
 }
 
 void load_image(int imageID){
 	if(jo_sprite_count() > 0){
-		jo_3d_free_sprite_quad(0);
+		if(!fallback_drawing){
+			jo_3d_free_sprite_quad(0);
+		}
+		
 		jo_sprite_free_all();
 	}
 	
@@ -76,6 +88,7 @@ void sys_events(void){
 
 		if(menu_disabling){
 			cleanup_menu();
+			jo_sprite_change_sprite_scale(fallback_zoom);
 			enable_menu = false;
 		}
 	}
@@ -171,15 +184,34 @@ void sys_pad(void){
 
 		//Zoom in
 		if(jo_is_pad1_key_pressed(JO_KEY_B)){
-			zoom_level += 1;
-			if(zoom_level > MAX_ZOOM){
-				zoom_level = MAX_ZOOM;
+			if(fallback_drawing){
+				fallback_zoom += 0.01f;
+				if(fallback_zoom > MAX_FALLBACK_ZOOM){
+					fallback_zoom = MAX_FALLBACK_ZOOM;
+				}
+
+				jo_sprite_change_sprite_scale(fallback_zoom);
+			}else{
+				zoom_level += 1;
+				if(zoom_level > MAX_ZOOM){
+					zoom_level = MAX_ZOOM;
+				}
 			}
+			
 		//Zoom out
 		}else if(jo_is_pad1_key_pressed(JO_KEY_C)){
-			zoom_level -= 1;
-			if(zoom_level < MIN_ZOOM){
-				zoom_level = MIN_ZOOM;
+			if(fallback_drawing){
+				fallback_zoom -= 0.01f;
+				if(fallback_zoom < MIN_FALLBACK_ZOOM){
+					fallback_zoom = MIN_FALLBACK_ZOOM;
+				}
+
+				jo_sprite_change_sprite_scale(fallback_zoom);
+			}else{
+				zoom_level -= 1;
+				if(zoom_level < MIN_ZOOM){
+					zoom_level = MIN_ZOOM;
+				}
 			}
 		}
 
@@ -188,6 +220,9 @@ void sys_pad(void){
 			zoom_level = DEFAULT_ZOOM;
 			x_pos = DEFAULT_X_POS;
 			y_pos = DEFAULT_Y_POS;
+
+			fallback_zoom = DEFAULT_FALLBACK_ZOOM;
+			jo_sprite_change_sprite_scale(fallback_zoom);
 		}
 	}
 	
@@ -195,9 +230,11 @@ void sys_pad(void){
 	if(jo_is_pad1_key_down(JO_KEY_START)){
 		if(enable_menu){
 			cleanup_menu();
+			jo_sprite_change_sprite_scale(fallback_zoom);
 			enable_menu = false;
 		}else{
 			enable_menu = true;
+			jo_sprite_change_sprite_scale(DEFAULT_FALLBACK_ZOOM);
 			clear_prints();
 			init_menu();
 		}
