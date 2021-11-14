@@ -182,7 +182,7 @@ void sys_pad(void){
 			}
 		}
 
-		//Zoom in
+		//Zoom out
 		if(jo_is_pad1_key_pressed(JO_KEY_B)){
 			if(fallback_drawing){
 				fallback_zoom -= 0.01f;
@@ -198,7 +198,7 @@ void sys_pad(void){
 				}
 			}
 			
-		//Zoom out
+		//Zoom in
 		}else if(jo_is_pad1_key_pressed(JO_KEY_C)){
 			if(fallback_drawing){
 				fallback_zoom += 0.01f;
