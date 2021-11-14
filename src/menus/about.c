@@ -24,7 +24,7 @@ void about_draw(){
 
     if(first_draw){
         jo_printf(5, 5, "Saturn ImageViewer");
-        jo_printf(5, 6, "Version 1.0");
+        jo_printf(5, 6, "Version 1.1");
         jo_printf(5, 8, "2021 Xalageus");
 
         first_draw = false;
