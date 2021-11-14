@@ -185,9 +185,9 @@ void sys_pad(void){
 		//Zoom in
 		if(jo_is_pad1_key_pressed(JO_KEY_B)){
 			if(fallback_drawing){
-				fallback_zoom += 0.01f;
-				if(fallback_zoom > MAX_FALLBACK_ZOOM){
-					fallback_zoom = MAX_FALLBACK_ZOOM;
+				fallback_zoom -= 0.01f;
+				if(fallback_zoom < MIN_FALLBACK_ZOOM){
+					fallback_zoom = MIN_FALLBACK_ZOOM;
 				}
 
 				jo_sprite_change_sprite_scale(fallback_zoom);
@@ -201,9 +201,9 @@ void sys_pad(void){
 		//Zoom out
 		}else if(jo_is_pad1_key_pressed(JO_KEY_C)){
 			if(fallback_drawing){
-				fallback_zoom -= 0.01f;
-				if(fallback_zoom < MIN_FALLBACK_ZOOM){
-					fallback_zoom = MIN_FALLBACK_ZOOM;
+				fallback_zoom += 0.01f;
+				if(fallback_zoom > MAX_FALLBACK_ZOOM){
+					fallback_zoom = MAX_FALLBACK_ZOOM;
 				}
 
 				jo_sprite_change_sprite_scale(fallback_zoom);
