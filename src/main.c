@@ -101,6 +101,10 @@ void load_image(int imageID){
 	if(err != 0){
 		load_failed = true;
 	}
+
+	//Palette handler seems to change printf color, therefore we reset printf color to white
+	jo_set_printf_palette_color(JO_COLOR_INDEX_White, JO_COLOR_White);
+	jo_set_printf_color_index(JO_COLOR_INDEX_White);
 }
 
 void draw_loading(){
