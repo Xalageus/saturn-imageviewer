@@ -25,6 +25,9 @@ bool pan_mode = false;
 int x_pos = 0;
 int y_pos = 0;
 bool enable_menu = false;
+bool load_failed = false;
+
+jo_palette image_pal;
 
 void clear_prints(){
 	jo_printf(0, 0, "                ");
@@ -33,9 +36,13 @@ void clear_prints(){
 	jo_printf(0, 3, "                ");
 	jo_printf(0, 5, "           ");
 	jo_printf(0, 6, "          ");
-	jo_printf(12, 28, "          ");
+	jo_printf(12, 28, "           ");
 	jo_printf(2, 28, "          ");
 	jo_printf(35, 28, "    ");
+}
+
+void draw_failed_msg(){
+	jo_printf(12, 28, "Load failed");
 }
 
 void sys_draw(void){
@@ -59,14 +66,20 @@ void sys_draw(void){
 		jo_printf(35, 28, "%d%%", jo_sprite_usage_percent());
 	}
 
-	if(fallback_drawing){
+	if(fallback_drawing && !load_failed){
 		jo_sprite_draw3D(0, x_pos, y_pos, 500);
-	}else{
+	}else if(!load_failed){
 		jo_3d_draw_sprite_at(0, x_pos, y_pos, zoom_level);
+	}
+
+	if(load_failed){
+		draw_failed_msg();
 	}
 }
 
 void load_image(int imageID){
+	jo_img_8bits img;
+
 	if(jo_sprite_count() > 0){
 		if(!fallback_drawing){
 			jo_3d_free_sprite_quad(0);
@@ -75,11 +88,23 @@ void load_image(int imageID){
 		jo_sprite_free_all();
 	}
 	
-	jo_sprite_add_tga("ART", imageList[imageID], JO_COLOR_Transparent);
+	load_failed = false;
+	img.data = JO_NULL;
+	int err = jo_tga_8bits_loader(&img, "ART", imageList[imageID], 0);
+	jo_sprite_add_8bits_image(&img);
+	jo_sprite_set_palette(image_pal.id);
+	jo_free_img(&img);
+	//int fail = jo_sprite_add_tga("ART", imageList[imageID], 0);
+	//if(fail == -1){
+	//	load_failed = true;
+	//}
+	if(err != 0){
+		load_failed = true;
+	}
 }
 
 void draw_loading(){
-	jo_printf(12, 28, "Loading...");
+	jo_printf(12, 28, "Loading... ");
 }
 
 void sys_events(void){
@@ -241,8 +266,14 @@ void sys_pad(void){
 	}
 }
 
+jo_palette * init_tga_palette_handling(void){
+	jo_create_palette(&image_pal);
+	return &image_pal;
+}
+
 void jo_main(void){
 	jo_core_init(JO_COLOR_Black);
+	jo_set_tga_palette_handling(init_tga_palette_handling);
 	max_image = get_image_count();
 	draw_loading();
 	load_image(image);

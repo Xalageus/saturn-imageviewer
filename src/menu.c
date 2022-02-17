@@ -8,7 +8,7 @@ bool enable_about = false;
 
 //Menu controlled Main vars
 bool draw_debug = false;
-bool fallback_drawing = false;
+bool fallback_drawing = true;
 
 void clear_menu(){
     jo_printf(7, 6, "                        ");
