@@ -38,6 +38,11 @@ echo Starting Yaba Sanshiro...
 call scripts\run_with_yabaSanshiro
 goto stop
 
+:mednafen
+echo Starting Mednafen...
+call scripts\run_with_mednafen
+goto stop
+
 :help
 echo run clean
 echo   clean environment
@@ -46,13 +51,15 @@ echo run compile [ssf]
 echo run compile [yabause]
 echo run compile [kronos]
 echo run compile [yaba]
-echo   clean and compile and optionally run ssf, yabause, kronos or yabaSanshiro
+echo run compile [mednafen]
+echo   clean and compile and optionally run ssf, yabause, kronos, yabaSanshiro or mednafen
 echo.
 echo run ssf
 echo run yabause
 echo run kronos
 echo run yaba
-echo   start ssf, yabause, kronos, yabaSanshiro
+echo run mednafen
+echo   start ssf, yabause, kronos, yabaSanshiro or mednafen
 goto stop
 
 :start
@@ -97,6 +104,10 @@ if "%1" == "yabause" (
         goto yaba
     )
 ) else (
+    if "%1" == "mednafen" (
+        goto mednafen
+    )
+) else (
     if "%2" == "yabause" (
         goto yabause
     )
@@ -111,6 +122,10 @@ if "%1" == "yabause" (
 ) else (
     if "%2" == "yaba" (
         goto yaba
+    )
+) else (
+    if "%2" == "mednafen" (
+        goto mednafen
     )
 )
 
@@ -130,6 +145,10 @@ if "%1" == "y" (
         goto yaba
     )
 ) else (
+    if "%1" == "m" (
+        goto mednafen
+    )
+) else (
     if "%2" == "y" (
         goto yabause
     )
@@ -144,6 +163,10 @@ if "%1" == "y" (
 ) else (
     if "%2" == "ys" (
         goto yaba
+    )
+) else (
+    if "%2" == "m" (
+        goto mednafen
     )
 )
 
